@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
-
+const Store = require('./api/models/store');
 
 mongoose.connect('mongodb+srv://ktavia:@cluster0.bstqd.mongodb.net/GoogleMapsApp?retryWrites=true&w=majority', {useNewUrlParser: true}, 
 { useUnifiedTopology: true });
