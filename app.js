@@ -9,12 +9,18 @@ mongoose.connect('mongodb+srv://ktavia:@cluster0.bstqd.mongodb.net/GoogleMapsApp
 app.use(express.json({ limit: '50mb'}));
 
 app.post('/api/stores', (req, res) => {
-  let dbStores = req.body;
-  res.send('sent post');
+    let dbStores = req.body;
+    res.send('sent post');
 })
 
 app.get('/', (req, res) => {
-  res.send('sent get');
+    res.send('sent get');
+})
+
+app.delete('/api/stores', (req, res) => {
+    Store.deleteMany({}, (err)=> {
+        res.status(200).send(err);
+    })
 })
 
 app.listen(3000, () => {
