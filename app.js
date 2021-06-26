@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
 const Store = require('./api/models/store');
-const store = require('./api/models/store');
 
 mongoose.connect('mongodb+srv://ktavia:@cluster0.bstqd.mongodb.net/GoogleMapsApp?retryWrites=true&w=majority', {useNewUrlParser: true}, 
 { useUnifiedTopology: true });
@@ -39,8 +38,15 @@ app.post('/api/stores', (req, res) => {
     })
 })
 
-app.get('/', (req, res) => {
-    res.send('sent get');
+app.get('/api/stores', (req, res) => {
+    Store.find({}, (err, stores) => {
+        if(err) {
+            res.status(500).send(err)
+        } else {
+            res.status(200).send(stores);
+        }
+    });
+    
 })
 
 app.delete('/api/stores', (req, res) => {
