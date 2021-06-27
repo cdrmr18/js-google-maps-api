@@ -1,10 +1,20 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
+require('dotenv').config();
+const axios = require('axios');
 const Store = require('./api/models/store');
 
-mongoose.connect('mongodb+srv://ktavia:@cluster0.bstqd.mongodb.net/GoogleMapsApp?retryWrites=true&w=majority', {useNewUrlParser: true}, 
-{ useUnifiedTopology: true });
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+});
+
+mongoose.connect('mongodb+srv://ktavia:D5JGjXVo3t7CO17d@cluster0.bstqd.mongodb.net/GoogleMapsApp?retryWrites=true&w=majority', {
+    useNewUrlParser: true, 
+    useUnifiedTopology: true,
+    useCreateIndex: true
+});
 
 app.use(express.json({ limit: '50mb'}));
 
@@ -39,14 +49,37 @@ app.post('/api/stores', (req, res) => {
 })
 
 app.get('/api/stores', (req, res) => {
-    Store.find({}, (err, stores) => {
-        if(err) {
-            res.status(500).send(err)
-        } else {
-            res.status(200).send(stores);
-        }
-    });
-    
+    const zipCode = req.query.zip_code;
+    const googleMapsUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+    axios.get(googleMapsUrl, {
+        params: {
+            address: zipCode,
+            key: process.env.API_Key
+        } 
+    }).then((response) => {
+        const data = response.data;
+        const coordinates = [response.data.results[0].geometry.location.lng, response.data.results[0].geometry.location.lat]
+
+        Store.find({
+            location: {
+                $near: {
+                    $maxDistance: 3218,
+                    $geometry: {
+                        type: 'Point',
+                        coordinates: coordinates
+                    }
+                }
+            }
+        }, (err, stores) => {
+            if(err) {
+                res.status(500).send(err)
+            } else {
+                res.status(200).send(stores);
+            }
+        })
+    }).catch((err) => {
+        console.log(err);
+    })
 })
 
 app.delete('/api/stores', (req, res) => {
